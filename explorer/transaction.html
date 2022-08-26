@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Blue0x Transaction Explorer">
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <meta name="author" content="Blue0x">
+  <title>Blue0x | EXPLORER</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-reset.css" rel="stylesheet">
+  <link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <link href="css/style.min.css" rel="stylesheet">
+  <link href="css/style-responsive.css" rel="stylesheet">
+</head>
+<body class="full-width">
+  <section id="container">
+    <script type="text/javascript" src="js/menu.js"></script>
+    <section id="main-content">
+      <section class="wrapper">
+        <div class="row">
+          <div class="col-lg-12">
+            <section class="panel">
+              <header class="panel-heading">
+                Transaction <span id="tx"> ...</span>
+              </header>
+              <div class="panel-body" id="panel-body">
+                <div class="adv-table">
+                    <table class="display table table-striped" id="table">
+                        <tbody id="table_body"></tbody>
+                    </table>
+                </div>
+              </div>
+            </section>
+          </div>
+      </section>
+      </div>
+    </section>
+  </section>
+<div class="modal fade" id="Modal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Raw Transaction Data:</h4>
+            </div>
+            <div class="modal-body">
+            	<span id="modal_content" style="word-wrap:break-word;"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/freemarket_scripts.js"></script>
+  <script src="js/constants.js"></script>
+  <script>
+  	function txModal() {
+  	$("#Modal").modal();
+  	var tx = getQueryVariable("transaction");
+  	$.getJSON(Constants.apiUrl, {
+        requestType: 'getTransaction',
+        transaction: tx
+      },
+      function(request){
+      $('#modal_content').html(JSON.stringify(request, null, 4));
+      })};  	
+  </script>
+  <script>
+  	var tx = getQueryVariable("transaction");
+  	$.getJSON(Constants.apiUrl, {
+        requestType: 'getTransaction',
+        transaction: tx
+      },
+      function(request){
+        console.log(request)
+      	var genesisDate = 1620390840;
+    	  var blockEpoch = (genesisDate + request.blockTimestamp) * 1000;
+      	var blockDate = new Date(blockEpoch);
+      	var sender = request.senderRS;
+      	var recipient = request.recipientRS;
+      	var amount = request.amountNQT/100000000;
+      	var fee = request.feeNQT/100000000;
+      	var confirmations = request.confirmations;
+      	var transaction = request.transaction;
+      	var height = request.height;
+      	var errorCode = request.errorCode;
+        if (!errorCode) {
+        $('#tx').text(tx);
+        var currency = request.attachment.currency;
+      	var currencyAmount = request.attachment.units/100;
+        var rows ='';
+        rows += '<p><b>Sent From:</b> ' + sender + '</p>';
+        rows += '<p><b>Sent To:</b> ' + recipient + '</p>';
+        rows += '<p><b>Date:</b> ' + blockDate.toLocaleString() + '</p>';
+        rows += '<p><b>Currency Code:</b> ' + currency + '</p>';
+        rows += '<p><b>Currency Amount:</b> ' + currencyAmount + '</p>';
+        rows += '<p><b>Height:</b> ' + height + '</p>';
+        rows += '<p><b>BLX Amount:</b> ' + amount + ' BLX</p>';
+        rows += '<p><b>Fee:</b> ' + fee + ' BLX</p>';
+        rows += '<p><b>Confirmations:</b> ' + confirmations + '</p>';
+        rows += '<br/>';
+        rows += '<button class="btn btn-primary" onclick="txModal();">View Raw Transaction</button>&nbsp;<a class="btn btn-primary" href="../index.html">Go Back</a>';
+      	$('#table_body').html(rows);
+      	} else {
+      	$('#tx').text(tx);
+      	$('#table_body').text(request.errorDescription);
+      	}
+      });
+  </script>
+</body>
+</html>
